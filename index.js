@@ -1,5 +1,5 @@
 const seedrandom = require('seedrandom');
-const rng = seedrandom();
+const rng = seedrandom(); // can pass a seed here
 
 function printSnowflakes(state) {
     // inverted traversal to print line by line in console
@@ -11,6 +11,7 @@ function printSnowflakes(state) {
 }
 
 function generateSnowflakes(w, h) {
+    console.log(`Generating random snowflake ${w}x${h}`);
     const arr = new Array(w);
     for (let outer = 0; outer < w; outer++) {
         arr[outer] = new Array(h);
@@ -53,8 +54,10 @@ function passTime(state) {
     return newState;
 }
 
-const initialState = generateSnowflakes(9, 5);
-// const initialState = getExampleSnowflakes();
+const initialState =
+    process.argv.slice(2)[0] === 'fixed'
+        ? getExampleSnowflakes()
+        : generateSnowflakes(9, 5);
 const finalState = passTime(initialState);
 
 printSnowflakes(initialState);
