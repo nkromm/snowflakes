@@ -2,64 +2,70 @@ const seedrandom = require('seedrandom');
 const rng = seedrandom(); // can pass a seed here
 
 function printSnowflakes(state) {
-    // inverted traversal to print line by line in console
-    const height = state[0].length;
-    for (let index = 0; index < height; index++) {
-        const dataOnVisualRow = state.map((x) => x[index]);
-        console.log(dataOnVisualRow.map((x) => (x === 0 ? '.' : '*')).join(''));
+    const w = state.length;
+    const h = state[0].length;
+
+    for (let i = 0; i < w; i++) {
+        let line = '';
+        for (let j = 0; j < h; j++) {
+            line += state[i][j] === 0 ? '.' : '*';
+        }
+        console.log(line);
     }
 }
 
-function generateSnowflakes(w, h) {
-    console.log(`Generating random snowflake ${w}x${h}`);
+function creat2dArray(w, h, fill) {
     const arr = new Array(w);
     for (let outer = 0; outer < w; outer++) {
         arr[outer] = new Array(h);
         for (let inner = 0; inner < h; inner++) {
-            arr[outer][inner] = Math.round(rng());
+            arr[outer][inner] = fill ? fill() : null;
         }
     }
     return arr;
 }
 
-// this is the same as the one given as example in the task description
-// It doesn't visually align with the image given as I use it inverted
 function getExampleSnowflakes() {
     return [
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0],
-        [1, 0, 0, 1, 0],
-        [0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
     ];
 }
 
 function passTime(state) {
-    const newState = new Array(state.length);
-    for (let outer = 0; outer < state.length; outer++) {
-        const innerArray = state[outer];
-        const zeroesCount = innerArray.filter((x) => x === 0).length;
-        const onesCount = innerArray.length - zeroesCount;
-        const newColumn = [
-            ...new Array(zeroesCount).fill(0),
+    const w = state.length;
+    const h = state[0].length;
+    const newState = creat2dArray(w, h);
+
+    for (let j = 0; j < h; j++) {
+        const newColumn = new Array(w);
+        for (let i = 0; i < w; i++) {
+            newColumn[i] = state[i][j];
+        }
+
+        const zeroCount = newColumn.filter((x) => x === 0).length;
+        const onesCount = newColumn.length - zeroCount;
+        const sortedColumn = [
+            ...new Array(zeroCount).fill(0),
             ...new Array(onesCount).fill(1),
         ];
-        newState[outer] = newColumn;
-    }
 
+        for (let k = 0; k < sortedColumn.length; k++) {
+            newState[k][j] = sortedColumn[k];
+        }
+    }
     return newState;
 }
 
 const initialState =
     process.argv.slice(2)[0] === 'fixed'
         ? getExampleSnowflakes()
-        : generateSnowflakes(9, 5);
-const finalState = passTime(initialState);
+        : creat2dArray(5, 9, () => Math.round(rng()));
 
 printSnowflakes(initialState);
+const finalState = passTime(initialState);
 console.log();
 printSnowflakes(finalState);
