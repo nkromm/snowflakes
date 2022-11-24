@@ -8,7 +8,10 @@ function printSnowflakes(state) {
     for (let i = 0; i < w; i++) {
         let line = '';
         for (let j = 0; j < h; j++) {
-            line += state[i][j] === 0 ? '.' : '*';
+            const val = state[i][j];
+            if (val === -1) line += 'o';
+            if (val === 0) line += '.';
+            if (val === 1) line += '*';
         }
         console.log(line);
     }
@@ -28,10 +31,15 @@ function creat2dArray(w, h, fill) {
 function getExampleSnowflakes() {
     return [
         [0, 0, 0, 1, 0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 1, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, -1, 1, 0, 0, 0, 1, 0, 0],
+        [0, -1, 0, 1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, -1, 0, 0, 0, 0, 0, 0, 0],
     ];
 }
 
@@ -46,18 +54,36 @@ function passTime(state) {
             newColumn[i] = state[i][j];
         }
 
-        const zeroCount = newColumn.filter((x) => x === 0).length;
-        const onesCount = newColumn.length - zeroCount;
-        const sortedColumn = [
-            ...new Array(zeroCount).fill(0),
-            ...new Array(onesCount).fill(1),
-        ];
+        let obsIdx = newColumn.findIndex((x) => x === -1);
+        let subStartId = 0;
+        while (obsIdx >= 0) {
+            const sub = newColumn.slice(subStartId, obsIdx);
+            if (sub && sub.length > 0) {
+                segregatedSub = segregateZeroesAndOnes(sub);
+                for (let k = subStartId; k < segregatedSub.length; k++) {
+                    newState[k][j] = segregatedSub[k];
+                }
+            } else {
+                newState[subStartId][j] = -1;
+            }
+            subStartId = obsIdx + 1;
+            obsIdx = newColumn.findIndex(
+                (x, index) => index >= subStartId + 1 && x === -1
+            );
+        }
+        segregatedColumn = segregateZeroesAndOnes(newColumn);
 
-        for (let k = 0; k < sortedColumn.length; k++) {
-            newState[k][j] = sortedColumn[k];
+        for (let k = subStartId; k < segregatedColumn.length; k++) {
+            newState[k][j] = segregatedColumn[k];
         }
     }
     return newState;
+}
+
+function segregateZeroesAndOnes(col) {
+    const zeroCount = col.filter((x) => x === 0).length;
+    const onesCount = col.length - zeroCount;
+    return [...new Array(zeroCount).fill(0), ...new Array(onesCount).fill(1)];
 }
 
 const initialState =

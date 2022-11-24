@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./index",
     "start:fixed": "node ./index fixed",
-    "dev": "nodemon ./index"
+    "dev": "nodemon ./index fixed"
   },
   "author": "",
   "license": "ISC",
